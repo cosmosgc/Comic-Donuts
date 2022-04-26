@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53007c00e75846759ea84a12ca07fa10, type: 3}
+  m_Name: ImageLibrary
+  m_EditorClassIdentifier: 
+  ImageDatas:
+  - Sprite: {fileID: 21300000, guid: 0d4899e8b1885c64a8a53853d6265d43, type: 3}
+    Name: The Water Tower
+    Date: 2020/08/18
+  - Sprite: {fileID: 21300000, guid: 5965fbd3f73e08e46964a2a9671cc1b6, type: 3}
+    Name: The Beach
+    Date: 2020/08/01
+  - Sprite: {fileID: 21300000, guid: 02bf2be8255a4a84dbff7d76adabb1dd, type: 3}
+    Name: View From Water Tower
+    Date: 2020/08/12
+  - Sprite: {fileID: 21300000, guid: 0310f4fec75a8244fad8ed8d30797395, type: 3}
+    Name: The Brige Night
+    Date: 2020/08/02
+  - Sprite: {fileID: 21300000, guid: 4e5279f2878b6c148921be59ac19b23a, type: 3}
+    Name: The Tree
+    Date: 2020/08/11
+  - Sprite: {fileID: 21300000, guid: 256eb08f5214bee43befbf23fdf760e8, type: 3}
+    Name: The Brigje Day
+    Date: 2020/08/03
+  - Sprite: {fileID: 21300000, guid: d9db49aa7c0f3cf44a8ec5f980e65158, type: 3}
+    Name: The Beach
+    Date: 2020/08/09
+  - Sprite: {fileID: 21300000, guid: 68bd7041a6d69e948b1e04ad711d5730, type: 3}
+    Name: Sun Francisco
+    Date: 2020/08/10
