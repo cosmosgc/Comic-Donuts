@@ -12,29 +12,10 @@ using UnityEngine.UI;
 
 public class ComicDownloadManager : MonoBehaviour
 {
-    [Serializable]
-    public class Source
-    {
-        [SerializeField] public string PostsURL;
-        [SerializeField] public string PageSyntax;
-        [SerializeField] public string PerPageSyntax;
-        [SerializeField] public int PageNumber = 0;
-        [SerializeField] public int PerPage = 10;
-        [SerializeField] public string SuffixSyntax;
-        [SerializeField] public string Options;
-    }
-    [Serializable]
-    public class SearchIndex
-    {
-        [SerializeField] public string start;
-        [SerializeField] public string finish;
-        [SerializeField] public string replace;
-        [SerializeField] public string replaceTo;
-    }
 
     public int pageNumber = 1;
     public int perPage = 10;
-    public Source source = new Source();
+    public SourceClass.source source = new SourceClass.source();
     [SerializeField] private PhotoViewer.Scripts.PhotoViewer _photoViewer = null;
     public string folder;
     public FileSystemEntry comicPath = new FileSystemEntry();
@@ -58,6 +39,7 @@ public class ComicDownloadManager : MonoBehaviour
     [TextArea(3, 10)]
     public string textSample;
 
+    /*
     public string searchIndexReference = "\"id\"";
     public string TextToFind = "\"curies\"";
     public string SearchCutContent;
@@ -67,8 +49,9 @@ public class ComicDownloadManager : MonoBehaviour
     public int cutLastIndex = 0;
     public string startSyntax;
     public string lastSyntax;
+    */
 
-    public List<SearchIndex> searchIndex = new List<SearchIndex>();
+    //public List<SourceClass.SearchIndex> searchIndex = new List<SourceClass.SearchIndex>();
 
     public List<string> postData;
     // Start is called before the first frame update
@@ -79,11 +62,6 @@ public class ComicDownloadManager : MonoBehaviour
         //SourcePostsShowCreate();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void getFoldersPath()
     {
         FileSystemEntry[] _folders = FileBrowserHelpers.GetEntriesInDirectory(PlayerPrefs.GetString("defaultFolder"), false);
@@ -115,15 +93,20 @@ public class ComicDownloadManager : MonoBehaviour
         for (int i = 0; i < fileEntries.Length; i++)
         {
             //Debug.Log("Comparando " + fileEntries[i].Name + " com " + sourceSelected + ".json");
-            if (fileEntries[i].Name == sourceSelected+".json")
+            if (fileEntries[i].Name == sourceSelected)
             {
                 Debug.Log("Achou Source");
                 string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
 
-                source = JsonUtility.FromJson<Source>(JsonFile);
+                source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
             }
         }
-        string sourceSyntax = source.PostsURL + source.PerPageSyntax + perPage.ToString() + source.PageSyntax + (pageNumber * perPage).ToString() + source.SuffixSyntax + source.Options;
+        string sourceSyntax = source.PostsURL + source.PageSyntax + (pageNumber * perPage).ToString() + source.PerPageSyntax + perPage.ToString() + source.SuffixSyntax + source.Options;
+        if(postsText != "")
+        {
+            InstantiateWebPosts();
+            return;
+        }
         Debug.Log("Source Pego " + sourceSyntax);
         Uri url = new Uri(sourceSyntax);
         StartCoroutine(DownloadPostsPages(url));
@@ -160,15 +143,21 @@ public class ComicDownloadManager : MonoBehaviour
         int cycleProtection = 0;
         textSample = postsText;
         postData.Clear();
-        while (textSample.IndexOf(searchIndexReference) != -1 && cycleProtection < 300)
+        while (textSample.IndexOf(source.postParser.searchIndexReference) != -1 && cycleProtection < 300)
         {
             cycleProtection++;
-            textSample = textSample.Substring(textSample.IndexOf(searchIndexReference) + searchIndexReference.Length);
-            textSample = textSample.Substring(textSample.IndexOf(TextToFind) + TextToFind.Length);
-            string toSend = SearchCutContent + textSample.Substring(0, textSample.IndexOf(finalIndex));
-            toSend = toSend.Substring(0, toSend.Length - finalIndex.Length);
-            toSend = startSyntax + toSend;
-            toSend = toSend + lastSyntax;
+            if (source.postParser.replace != "" || source.postParser.replaceTo != "")
+            {
+                textSample = textSample.Replace(source.postParser.replace, source.postParser.replaceTo);
+            }
+            textSample = textSample.Substring(textSample.IndexOf(source.postParser.searchIndexReference) + source.postParser.searchIndexReference.Length);
+            //textSample = textSample.Substring(textSample.IndexOf(source.postParser.TextToFind) + source.postParser.TextToFind.Length);
+            string toSend = textSample.Substring(0, textSample.IndexOf(source.postParser.TextToFindFinish));
+            //toSend = toSend.Substring(0, toSend.Length - source.postParser.TextToFindFinish.Length);
+            //toSend = source.postParser.startSyntax + toSend;
+            
+            toSend = source.postParser.PrefixMissing + toSend + source.postParser.SuffixMissing;
+            Debug.Log(toSend);
             postData.Add(toSend);
         }
         CreatePostData();
@@ -192,21 +181,22 @@ public class ComicDownloadManager : MonoBehaviour
             
             searchIndex.Add(_searchIndex);
             */
-            for (int x = 0; x < searchIndex.Count; x++)
+            Debug.Log(source.ToString());
+            for (int x = 0; x < source.searchs.Count; x++)
             {
-                _postData = _postData.Substring(_postData.IndexOf(searchIndex[x].start) + searchIndex[x].start.Length);
-                string toSend = _postData.Substring(0, _postData.IndexOf(searchIndex[x].finish));
-                if(searchIndex[x].replace !=""|| searchIndex[x].replaceTo != "")
+                _postData = _postData.Substring(_postData.IndexOf(source.searchs[x].start) + source.searchs[x].start.Length);
+                string toSend = _postData.Substring(0, _postData.IndexOf(source.searchs[x].finish));
+                if(source.searchs[x].replace !=""|| source.searchs[x].replaceTo != "")
                 {
-                    toSend = toSend.Replace(searchIndex[x].replace, searchIndex[x].replaceTo);
+                    toSend = toSend.Replace(source.searchs[x].replace, source.searchs[x].replaceTo);
                 }
                 
                 _postInfo.Add(toSend);
             }
             GameObject ComicPostInstance = Instantiate(comicItemPrefab, ComicItemContainer.transform);
-            ComicPostInstance.name = _postInfo[1];
-            ComicPostInstance.GetComponent<ComicObject>().comicName = _postInfo[1];
-            ComicPostInstance.GetComponent<ComicObject>().url = _postInfo[2];
+            ComicPostInstance.name = _postInfo[0];
+            ComicPostInstance.GetComponent<ComicObject>().comicName = _postInfo[0];
+            ComicPostInstance.GetComponent<ComicObject>().url = _postInfo[1];
             ComicPostInstance.GetComponent<ComicObject>().rawPostData = postData[i];
             ComicPostInstance.GetComponent<ComicObject>().comicScreen = comicScreen;
             ComicPostInstance.GetComponent<ComicObject>().comicSelectScreen = comicSelectScreen;

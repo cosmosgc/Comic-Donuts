@@ -36,13 +36,17 @@ public class ComicObject : MonoBehaviour
     private List<ImageData> image = new List<ImageData>();
     private List<string> DownloadSucess = new List<string>();
 
-    private string textSample;
+    [TextArea(3, 10)]
+    public string textSample;
+    /*
     private string searchIndexReference = "rl-gallery-item";
     private string TextToFind = "src=\\\"";
     private string SearchCutContent = "";
     private string replace = @"\/";
     private string replaceTo = "/";
     private int cutLastIndex = 1;
+    */
+    public SourceClass.source source = new SourceClass.source();
 
     //public List<Texture2D> PagesImages = new List<Texture2D>();
     private Texture2D thumbnail;
@@ -76,6 +80,26 @@ public class ComicObject : MonoBehaviour
         }
     }
 
+    public void getSourceClass()
+    {
+        if (sourcePath.Path == null)
+        {
+            getFoldersPath();
+        }
+
+        FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(sourcePath.Path, false);
+        for (int i = 0; i < fileEntries.Length; i++)
+        {
+            //Debug.Log("Comparando " + fileEntries[i].Name + " com " + sourceSelected + ".json");
+            if (fileEntries[i].Name == sourceSelected)
+            {
+                Debug.Log("Achou Source");
+                string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
+
+                source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
+            }
+        }
+    }
     public void GetLocalComicInfo(string comicPath)
     {
         FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(comicPath, false);
@@ -125,6 +149,7 @@ public class ComicObject : MonoBehaviour
             queue.Run(LoadLocalImage(_ComicPages[0]));
             return;
         }
+
         Uri _dImage = new Uri(OnlinePagesURL[0]);
         queue.Run(StreamImage(_dImage));
     }
@@ -290,7 +315,6 @@ public class ComicObject : MonoBehaviour
                 if (download)
                 {
                     byte[] results = uwr.downloadHandler.data;
-                    //string fileName = FileBrowserHelpers.GetFilename(OnlinePagesURL[index]);
                     string fileName = Path.GetFileName(OnlinePagesURL[index]);
                     string _comicName = comicName.Replace("\\", "");
                     _comicName = _comicName.Replace("/", "");
@@ -301,6 +325,7 @@ public class ComicObject : MonoBehaviour
                     downloadBar.value = DownloadSucess.Count;
                 }
             }
+            uwr.Dispose();
         }
         totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
         
@@ -309,6 +334,8 @@ public class ComicObject : MonoBehaviour
             Debug.Log("Baixou a comic["+comicName+"] com sucesso!");
         }
     }
+
+    //baixa a imagem sem salvar no HD, fica na memória
     IEnumerator StreamImage(Uri url2, int index = 0, bool download = false)
     {
         Debug.Log("Baixando " + url2);
@@ -323,8 +350,7 @@ public class ComicObject : MonoBehaviour
             }
             else
             {
-                Debug.Log("Success" + uwr.error);
-                //PagesImages.Add(DownloadHandlerTexture.GetContent(uwr));
+                Debug.Log("Success" + uwr.error + " " + url2);
                 ImageData _img = new ImageData();
 
                 _img.Name = FileBrowserHelpers.GetFilename(OnlinePagesURL[index]);
@@ -386,7 +412,7 @@ public class ComicObject : MonoBehaviour
         }
     }
 
-    
+    //atualiza o caminho das pastas
     public void getFoldersPath()
     {
         FileSystemEntry[] _folders = FileBrowserHelpers.GetEntriesInDirectory(PlayerPrefs.GetString("defaultFolder"), false);
@@ -416,25 +442,63 @@ public class ComicObject : MonoBehaviour
         }
     }
 
+    //popula OnlinePagesURL
     public void getPagesLink()
     {
+        //pega o source selecionado
+        getSourceClass();
+
         pagesURL.Clear();
         if (rawPostData != "")
         {
             textSample = rawPostData;
         }
+        else
+        {
+            GetPostHTML();
+        }
         string _textSample;
         int cycleProtection = 0;
-        while (textSample.IndexOf(searchIndexReference) != -1 && cycleProtection < 300)
+        
+        //o parse json começa aqui
+        textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.searchIndexReference) + source.imageSearch.searchIndexReference.Length);
+        while (textSample.IndexOf(source.imageSearch.start) != -1 && cycleProtection < 300)
         {
             cycleProtection++;
-            textSample = textSample.Substring(textSample.IndexOf(searchIndexReference) + searchIndexReference.Length);
-            textSample = textSample.Substring(textSample.IndexOf(TextToFind) + TextToFind.Length);
-            _textSample = SearchCutContent + textSample.Substring(0, textSample.IndexOf("\""));
-            string newImageURL = _textSample.Replace(replace, replaceTo);
-            newImageURL = newImageURL.Substring(0, newImageURL.Length - cutLastIndex);
-            
+            textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.start) + source.imageSearch.start.Length);
+            _textSample = source.imageSearch.PrefixMissing + textSample.Substring(0, textSample.IndexOf(source.imageSearch.finish));
+            string newImageURL = _textSample;
+            if (source.imageSearch.replace != "" || source.imageSearch.replaceTo != "")
+            {
+                newImageURL = newImageURL.Replace(source.imageSearch.replace, source.imageSearch.replaceTo);
+            }
+            newImageURL = newImageURL.Substring(0, newImageURL.Length - source.imageSearch.cutLastIndex);
+
             OnlinePagesURL.Add(newImageURL);
+        }
+    }
+    public void GetPostHTML()
+    {
+        Uri _url = new Uri(url);
+        queue.Run(DownloadPostsPages(_url));
+    }
+
+    IEnumerator DownloadPostsPages(Uri url2)
+    {
+        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url2))
+        {
+            yield return uwr.SendWebRequest();
+
+            if (uwr.result == UnityWebRequest.Result.ConnectionError)
+            {
+                Debug.Log(uwr.error);
+            }
+            else
+            {
+                string Text = uwr.downloadHandler.text;
+
+                rawPostData = Text;
+            }
         }
     }
     public void CreateImagesData()

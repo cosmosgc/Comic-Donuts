@@ -6,72 +6,18 @@ using UnityEngine;
 using TMPro;
 using SimpleFileBrowser;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class SourceManager : MonoBehaviour
 {
 
-    [Serializable]
-    public class PostParse
-    {
-        [SerializeField] public string TextToFind;
-        [SerializeField] public string searchIndexReference;
-        [SerializeField] public string SearchCutContent;
-        [SerializeField] public string replace;
-        [SerializeField] public string replaceTo;
-        [SerializeField] public int cutLastIndex;
-    }
-
-    [Serializable]
-    public class Source
-    {
-        [SerializeField] public string PostsURL;
-        [SerializeField] public string PageSyntax;
-        [SerializeField] public string PerPageSyntax;
-        [SerializeField] public int PageNumber;
-        [SerializeField] public int PerPage;
-        [SerializeField] public string SuffixSyntax;
-        [SerializeField] public string Options;
-    }
-    [Serializable]
-    public class SearchIndex
-    {
-        [SerializeField] public string name;
-        [SerializeField] public string start;
-        [SerializeField] public string finish;
-        [SerializeField] public string replace;
-        [SerializeField] public string replaceTo;
-    }
-    [Serializable]
-    public class imageSearch
-    {
-        [SerializeField] public string start;
-        [SerializeField] public string finish;
-        [SerializeField] public string replace;
-        [SerializeField] public string replaceTo;
-        [SerializeField] public string PrefixMissing;
-        [SerializeField] public string SuffixMissing;
-    }
-    [Serializable]
-    public class newSource
-    {
-        [SerializeField] public string PostsURL;
-        [SerializeField] public string PageSyntax;
-        [SerializeField] public string PerPageSyntax;
-        [SerializeField] public int PageNumber;
-        [SerializeField] public int PerPage;
-        [SerializeField] public string SuffixSyntax;
-        [SerializeField] public string Options;
-        [SerializeField] public string replaceTo;
-
-        [SerializeField] public List<SearchIndex> searchs;
-        [SerializeField] public imageSearch imageSearch;
-    }
+    
 
     public FileSystemEntry comicPath = new FileSystemEntry();
     public FileSystemEntry sourcePath = new FileSystemEntry();
-    public newSource source = new newSource();
-    public List<SearchIndex> searchIndex = new List<SearchIndex>();
-    public imageSearch image = new imageSearch();
+    public SourceClass.source source = new SourceClass.source();
+    public List<SourceClass.SearchIndex> searchIndex = new List<SourceClass.SearchIndex>();
+    public SourceClass.imageSearch image = new SourceClass.imageSearch();
 
     public string folder;
     public string FileFolderName;
@@ -85,6 +31,8 @@ public class SourceManager : MonoBehaviour
     public string PostHTMLContent;
 
     public string jsonToSave;
+
+    public Slider slider;
 
 
 
@@ -227,7 +175,22 @@ public class SourceManager : MonoBehaviour
         image.replaceTo = info;
         postImagePreview();
     }
+    public void changeImageSearchRef(string info)
+    {
+        image.searchIndexReference = info;
+        postImagePreview();
+    }
+    public void changeImageSearchCutLastIndex(float info)
+    {
+        image.cutLastIndex = (int)info;
+        sliderPreview();
+        postImagePreview();
+    }
 
+    public void sliderPreview()
+    {
+        slider.value = image.cutLastIndex;
+    }
     public void PreviewInfo()
     {
         //DebugText.text = JsonUtility.ToJson(source, true); 
@@ -271,6 +234,7 @@ public class SourceManager : MonoBehaviour
         {
             toSend = toSend.Replace(image.replace, image.replaceTo);
         }
+        toSend = toSend.Substring(0, toSend.Length - source.imageSearch.cutLastIndex);
         return toSend;
     }
 
