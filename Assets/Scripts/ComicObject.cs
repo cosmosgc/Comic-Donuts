@@ -38,14 +38,7 @@ public class ComicObject : MonoBehaviour
 
     [TextArea(3, 10)]
     public string textSample;
-    /*
-    private string searchIndexReference = "rl-gallery-item";
-    private string TextToFind = "src=\\\"";
-    private string SearchCutContent = "";
-    private string replace = @"\/";
-    private string replaceTo = "/";
-    private int cutLastIndex = 1;
-    */
+
     public SourceClass.source source = new SourceClass.source();
 
     //public List<Texture2D> PagesImages = new List<Texture2D>();
@@ -55,20 +48,27 @@ public class ComicObject : MonoBehaviour
     FileSystemEntry[] _ComicPages;
 
     private CoroutineQueue queue;
+    private uint downloadLimit = 1;
 
     private void Start()
     {
-        if(queue == null)
+        startQueue();
+    }
+
+    private void startQueue()
+    {
+        if (queue == null)
         {
-            queue = new CoroutineQueue(3, StartCoroutine);
+            if (PlayerPrefs.GetInt("defaultDownloads") > 1)
+            {
+                downloadLimit = (uint)PlayerPrefs.GetInt("defaultDownloads");
+            }
+            queue = new CoroutineQueue(downloadLimit, StartCoroutine);
         }
     }
     public void UpdatePostInfo()
     {
-        if (queue == null)
-        {
-            queue = new CoroutineQueue(3, StartCoroutine);
-        }
+        startQueue();
         comicNameText.text = comicName;
         if (offline)
         {
@@ -233,6 +233,7 @@ public class ComicObject : MonoBehaviour
             string _comicName = comicName.Replace("\\", "");
             _comicName = _comicName.Replace("/", "");
             Debug.Log("FileName: " + fileName + " ComicName: " + _comicName);
+
             //Verifica se arquivo existe
             bool _exist = false;
 
@@ -273,12 +274,6 @@ public class ComicObject : MonoBehaviour
 
         _tex.LoadImage(results) ;
 
-        //Esse compress crasha o editor
-        if (!Application.isEditor)
-        {
-            _tex.Compress(false);
-            _tex.Apply();
-        }
 
         ImageData _img = new ImageData();
         _img.Name = FileBrowserHelpers.GetFilename(_fileToLoad.Name);

@@ -39,27 +39,23 @@ public class ComicDownloadManager : MonoBehaviour
     [TextArea(3, 10)]
     public string textSample;
 
-    /*
-    public string searchIndexReference = "\"id\"";
-    public string TextToFind = "\"curies\"";
-    public string SearchCutContent;
-    public string finalIndex;
-    public string replace;
-    public string replaceTo;
-    public int cutLastIndex = 0;
-    public string startSyntax;
-    public string lastSyntax;
-    */
-
-    //public List<SourceClass.SearchIndex> searchIndex = new List<SourceClass.SearchIndex>();
 
     public List<string> postData;
+
+    private CoroutineQueue queue;
     // Start is called before the first frame update
     void Start()
     {
         folder = PlayerPrefs.GetString("defaultFolder");
         PopulateSourcesList();
-        //SourcePostsShowCreate();
+        if (queue == null)
+        {
+            queue = new CoroutineQueue(1, StartCoroutine);
+        }
+        if(sourceSelected == "")
+        {
+            sourceSelected = PlayerPrefs.GetString("defaultSource");
+        }
     }
 
     public void getFoldersPath()
@@ -125,17 +121,23 @@ public class ComicDownloadManager : MonoBehaviour
         }
         for (int i = 0; i < folderEntries.Length; i++)
         {
-            
-            GameObject ComicPostInstance = Instantiate(comicItemPrefab, ComicItemContainer.transform);
-            ComicPostInstance.name = folderEntries[i].Name;
-            ComicPostInstance.GetComponent<ComicObject>().comicName = folderEntries[i].Name;
-            ComicPostInstance.GetComponent<ComicObject>().url = folderEntries[i].Path;
-            ComicPostInstance.GetComponent<ComicObject>().offline = true;
-            ComicPostInstance.GetComponent<ComicObject>().comicScreen = comicScreen;
-            ComicPostInstance.GetComponent<ComicObject>().comicSelectScreen = comicSelectScreen;
-            ComicPostInstance.GetComponent<ComicObject>().photoViewer = _photoViewer;
-            ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
+            queue.Run(LocalInstancingComic(folderEntries[i]));
         }
+    }
+
+    public IEnumerator LocalInstancingComic(FileSystemEntry comicFolder)
+    {
+        Debug.Log("Instanciando: " + comicFolder.Path);
+        GameObject ComicPostInstance = Instantiate(comicItemPrefab, ComicItemContainer.transform);
+        ComicPostInstance.name = comicFolder.Name;
+        ComicPostInstance.GetComponent<ComicObject>().comicName = comicFolder.Name;
+        ComicPostInstance.GetComponent<ComicObject>().url = comicFolder.Path;
+        ComicPostInstance.GetComponent<ComicObject>().offline = true;
+        ComicPostInstance.GetComponent<ComicObject>().comicScreen = comicScreen;
+        ComicPostInstance.GetComponent<ComicObject>().comicSelectScreen = comicSelectScreen;
+        ComicPostInstance.GetComponent<ComicObject>().photoViewer = _photoViewer;
+        ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
+        yield return null;
     }
 
     public void InstantiateWebPosts()
@@ -262,59 +264,18 @@ public class ComicDownloadManager : MonoBehaviour
         }
     }
 
+    public void OpenComicFolder()
+    {
+        if(comicPath.Path == null)
+        {
+            getFoldersPath();
+        }
+        Application.OpenURL(comicPath.Path);
+    }
     public void selectSource(string info)
     {
         sourceSelected = info;
+        PlayerPrefs.SetString("defaultSource", info);
     }
 
-
-
-
-    public class PostContent
-    {
-        public int id { get; set; }
-        public int postName { get; set; }
-        public int postPagesCount { get; set; }
-        public int postLink { get; set; }
-        public int postContent { get; set; }
-        public int data { get; set; }
-    }
-
-    public class WordpressAPI
-    {
-        public int id { get; set; }
-        public DateTime date { get; set; }
-        public DateTime date_gmt { get; set; }
-        public Guid guid { get; set; }
-        public DateTime modified { get; set; }
-        public DateTime modified_gmt { get; set; }
-        public string slug { get; set; }
-        public string status { get; set; }
-        public string type { get; set; }
-        public string link { get; set; }
-        public Title title { get; set; }
-        public Content content { get; set; }
-        public int author { get; set; }
-        public int featured_media { get; set; }
-        public string comment_status { get; set; }
-        public string ping_status { get; set; }
-        public bool sticky { get; set; }
-        public string template { get; set; }
-        public string format { get; set; }
-        public List<int> categories { get; set; }
-        public List<int> tags { get; set; }
-    }
-    public class WordpressList
-    {
-        public WordpressAPI[] wordpressList { get; set; }
-    }
-    public class Title
-    {
-        public string rendered { get; set; }
-    }
-    public class Content
-    {
-        public string rendered { get; set; }
-        public bool @protected { get; set; }
-    }
 }

@@ -70,6 +70,11 @@ public class Options : MonoBehaviour
         StartCoroutine(ShowLoadDialogCoroutine());
     }
 
+    public void changeDownloadLimit(int info)
+    {
+        PlayerPrefs.SetInt("defaultDownloads", info);
+    }
+
     public void newFolder(string folderPath)
     {
         PlayerPrefs.SetString("defaultFolder", folderPath);

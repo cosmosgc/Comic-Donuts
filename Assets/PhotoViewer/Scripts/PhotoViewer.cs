@@ -71,12 +71,14 @@ namespace PhotoViewer.Scripts
         public void NextImage()
         {
             CurrentPhoto = (++CurrentPhoto > _images.Count - 1) ? 0 : CurrentPhoto;
+
             ShowImage(_images[CurrentPhoto]);
         }
 
         public void PrevImage()
         {
             CurrentPhoto = (CurrentPhoto <= 0) ? _images.Count - 1 : CurrentPhoto - 1;
+
             ShowImage(_images[CurrentPhoto]);
         }
 
