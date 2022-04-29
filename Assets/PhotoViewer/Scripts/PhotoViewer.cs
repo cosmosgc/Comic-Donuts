@@ -4,6 +4,7 @@ using PhotoViewer.Scripts.Photo;
 using PhotoViewer.Scripts.Gallery;
 using PhotoViewer.Scripts.Panorama;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace PhotoViewer.Scripts
 {
@@ -80,6 +81,23 @@ namespace PhotoViewer.Scripts
             CurrentPhoto = (CurrentPhoto <= 0) ? _images.Count - 1 : CurrentPhoto - 1;
 
             ShowImage(_images[CurrentPhoto]);
+        }
+
+        public void changeImage(InputAction.CallbackContext context)
+        {
+            int index = (int)context.ReadValue<float>();
+            if (context.performed)
+            {
+                if (index == 1)
+                {
+                    CurrentPhoto = (++CurrentPhoto > _images.Count - 1) ? 0 : CurrentPhoto;
+                }
+                else
+                {
+                    CurrentPhoto = (CurrentPhoto <= 0) ? _images.Count - 1 : CurrentPhoto - 1;
+                }
+                ShowImage(_images[CurrentPhoto]);
+            }
         }
 
         public void Return() =>

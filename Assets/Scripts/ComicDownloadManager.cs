@@ -9,6 +9,7 @@ using TMPro;
 using System.Text;
 using SimpleFileBrowser;
 using UnityEngine.UI;
+using Madhur.InfoPopup;
 
 public class ComicDownloadManager : MonoBehaviour
 {
@@ -176,13 +177,6 @@ public class ComicDownloadManager : MonoBehaviour
             string _postData = postData[i];
             List<string> _postInfo = new List<string>();
 
-            /*
-            searchIndex.Add(new SearchIndex() { start = "\"id\": ", finish = ",", replace = "", replaceTo = "" });
-            searchIndex.Add(new SearchIndex() { start = "\"\"title\":{\"rendered\":\"", finish = "\"", replace = "", replaceTo = "" });
-            searchIndex.Add(new SearchIndex() { start = "\"self\":[{ \"href\":\"", finish = "\"", replace = "", replaceTo = "" });
-            
-            searchIndex.Add(_searchIndex);
-            */
             Debug.Log(source.ToString());
             for (int x = 0; x < source.searchs.Count; x++)
             {
@@ -230,8 +224,8 @@ public class ComicDownloadManager : MonoBehaviour
             else
             {
                 //byte[] bytes = Encoding.Default.GetBytes(uwr.downloadHandler.text);
-                byte[] bConvert = UnicodeEncoding.Convert(Encoding.UTF8, Encoding.Unicode, uwr.downloadHandler.data);
-                string Text = Encoding.Unicode.GetString(bConvert); ;
+                //byte[] bConvert = UnicodeEncoding.Convert(Encoding.UTF8, Encoding.Unicode, uwr.downloadHandler.data);
+                string Text = Encoding.Unicode.GetString(UnicodeEncoding.Convert(Encoding.UTF8, Encoding.Unicode, uwr.downloadHandler.data)); ;
 
                 postsText = Text;
             }
@@ -276,6 +270,7 @@ public class ComicDownloadManager : MonoBehaviour
     {
         sourceSelected = info;
         PlayerPrefs.SetString("defaultSource", info);
+        InfoPopupUtil.ShowInformation("Selecionou [" + sourceSelected + "]!");
     }
 
 }

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c3a315058d4b2a42953d48d41fceed6, type: 3}
+  m_Name: Popup-Type-Info
+  m_EditorClassIdentifier: 
+  PanelBase: {fileID: 21300000, guid: 784240924b8db8146a729373d5e6033f, type: 3}
+  PanelColor: {r: 0.9490196, g: 0.18039216, b: 0.38431373, a: 1}
+  Image: {fileID: 21300000, guid: 6c8cbd6a0db62374580f210e8e46f4fd, type: 3}
+  DrawImage: 1
+  Style: 0

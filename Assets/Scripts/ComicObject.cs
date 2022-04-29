@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine.UI;
 using PhotoViewer.Scripts;
 using SimpleFileBrowser;
+using Madhur.InfoPopup;
 
 public class ComicObject : MonoBehaviour
 {
@@ -309,24 +310,26 @@ public class ComicObject : MonoBehaviour
                 Debug.Log("Success" + uwr.error);
                 if (download)
                 {
-                    byte[] results = uwr.downloadHandler.data;
+                    //byte[] results = uwr.downloadHandler.data;
                     string fileName = Path.GetFileName(OnlinePagesURL[index]);
                     string _comicName = comicName.Replace("\\", "");
                     _comicName = _comicName.Replace("/", "");
                     //string _folder = comicPath + _comicName + "\\";
-                    Debug.Log("saveImage("+ comicPath.Path + ", " + results+ ", " + _comicName + ", " + fileName +");");
-                    saveImage(comicPath.Path, results, _comicName ,fileName);  // give filename
+                    Debug.Log("saveImage("+ comicPath.Path + ", " + uwr.downloadHandler.data + ", " + _comicName + ", " + fileName +");");
+                    saveImage(comicPath.Path, uwr.downloadHandler.data, _comicName ,fileName);  // give filename
                     DownloadSucess.Add(fileName);
                     downloadBar.value = DownloadSucess.Count;
+                    uwr.Dispose();
                 }
             }
-            uwr.Dispose();
         }
         totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
         
         if (OnlinePagesURL.Count == DownloadSucess.Count)
         {
+            InfoPopupUtil.ShowInformation("Baixou a comic[" + comicName + "] com sucesso!");
             Debug.Log("Baixou a comic["+comicName+"] com sucesso!");
+            clearMemory();
         }
     }
 
@@ -363,7 +366,7 @@ public class ComicObject : MonoBehaviour
 
         if (OnlinePagesURL.Count == image.Count)
         {
-            //ShowComic();
+            clearMemory();
         }
     }
 
@@ -405,6 +408,7 @@ public class ComicObject : MonoBehaviour
             Debug.LogWarning("Failed To Save Data to: " + _newComicPath.Replace("/", "\\"));
             Debug.LogWarning("Error: " + e.Message);
         }
+        imageBytes = null;
     }
 
     //atualiza o caminho das pastas
@@ -508,5 +512,4 @@ public class ComicObject : MonoBehaviour
     {
         Resources.UnloadUnusedAssets();
     }
-
 }

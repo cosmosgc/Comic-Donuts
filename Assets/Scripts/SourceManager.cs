@@ -7,6 +7,7 @@ using TMPro;
 using SimpleFileBrowser;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using Madhur.InfoPopup;
 
 public class SourceManager : MonoBehaviour
 {
@@ -332,6 +333,8 @@ public class SourceManager : MonoBehaviour
                 Debug.Log("Received: " + html.error);
 
                 HTMLContent = html.downloadHandler.text;
+
+                InfoPopupUtil.ShowInformation("Fez conexão!");
             }
         }
     }
@@ -351,6 +354,7 @@ public class SourceManager : MonoBehaviour
                 Debug.Log("Received: " + html.error);
 
                 PostHTMLContent = html.downloadHandler.text;
+                InfoPopupUtil.ShowInformation("Pegou o post!");
             }
         }
     }

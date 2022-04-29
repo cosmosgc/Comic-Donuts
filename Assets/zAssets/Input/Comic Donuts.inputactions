@@ -33,22 +33,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Next",
-                    "type": "Button",
+                    "name": "changeImage",
+                    "type": "Value",
                     "id": "1c46e5ab-fb1b-4a96-b8c7-2e3a4d5d0868",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
-                    "name": "Previous",
-                    "type": "Button",
-                    "id": "878e0302-ec0e-496d-b78b-147a567e8c5a",
-                    "expectedControlType": "Button",
+                    "name": "Zoom",
+                    "type": "Value",
+                    "id": "351761f5-237c-487d-8128-334ee735818a",
+                    "expectedControlType": "Touch",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -273,26 +273,70 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "76cbe072-1889-4a37-b1ef-8ed48bde2fb4",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "SlowTap",
+                    "name": "1D Axis",
+                    "id": "7e9e8e4d-54d7-4a5d-97f9-c621d951b16c",
+                    "path": "1DAxis",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Next",
-                    "isComposite": false,
+                    "action": "changeImage",
+                    "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "2cb4030e-5c72-46c5-9004-ed77c43a92d7",
+                    "name": "negative",
+                    "id": "d5b81413-d159-421c-910e-9f78c7ff5a5e",
                     "path": "<Keyboard>/leftArrow",
-                    "interactions": "Press(pressPoint=1)",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Previous",
+                    "action": "changeImage",
                     "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "35996b7e-527d-4977-bf6b-f83009d12351",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "changeImage",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "1D Axis touch",
+                    "id": "3a885eb6-28ed-4e4e-8a21-31f53cb74be1",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "changeImage",
+                    "isComposite": true,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "f5389c24-0db0-4af0-b3ce-2c2fffd06a5e",
+                    "path": "<Touchscreen>/primaryTouch/indirectTouch",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Touch",
+                    "action": "changeImage",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "5bcc5fff-360d-42aa-b0f0-84eacd8f50bb",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "changeImage",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },
