@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using PhotoViewer.Scripts;
 using SimpleFileBrowser;
 using Madhur.InfoPopup;
+using Proyecto26;
 
 public class ComicObject : MonoBehaviour
 {
@@ -123,13 +124,19 @@ public class ComicObject : MonoBehaviour
         {
             getPagesLink();
         }
-        getThumbnailOnline();
+        
         
         commicButton.onClick.AddListener(DownloadSourceComic);
     }
 
     public void getThumbnailOnline()
     {
+        if(source.searchs[2].name == "thumbnail" && source.searchs[2].link != null)
+        {
+            Uri thumb = new Uri(source.searchs[2].link);
+            queue.Run(StreamImage(thumb));
+            return;
+        }
         string _comicName = comicName.Replace("\\", "");
         _comicName = _comicName.Replace("/", "");
         bool _exist = false;
@@ -330,7 +337,7 @@ public class ComicObject : MonoBehaviour
 
         UnityWebRequest uwr = new UnityWebRequest(url2);
         uwr.method = UnityWebRequest.kHttpVerbGET;
-        var dh = new DownloadHandlerFile(_filePath);
+        DownloadHandlerFile dh = new DownloadHandlerFile(_filePath, true);
         dh.removeFileOnAbort = true;
         uwr.downloadHandler = dh;
 
@@ -350,8 +357,8 @@ public class ComicObject : MonoBehaviour
                 Debug.Log("Baixou a comic[" + comicName + "] com sucesso!");
                 clearMemory();
             }
+            uwr.Dispose();
         }
-        uwr.Dispose();
     }
 
     IEnumerator DownloadingImageAndroid(Uri url2, int index = 0, bool download = false)
@@ -383,6 +390,7 @@ public class ComicObject : MonoBehaviour
                     uwr.Dispose();
                 }
             }
+
         }
         totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
 
@@ -393,6 +401,7 @@ public class ComicObject : MonoBehaviour
             clearMemory();
         }
     }
+
 
     //baixa a imagem sem salvar no HD, fica na memória
     IEnumerator StreamImage(Uri url2, int index = 0, bool download = false)
@@ -470,6 +479,7 @@ public class ComicObject : MonoBehaviour
             Debug.LogWarning("Error: " + e.Message);
         }
         imageBytes = null;
+        clearMemory();
     }
 
     public string GetComicFolder(string _comicName)
@@ -521,7 +531,7 @@ public class ComicObject : MonoBehaviour
 
     public void displayThumbnail(Texture2D _thumbnail = null)
     {
-        if (_thumbnail)
+        if (_thumbnail && sprite.sprite == null)
         {
             sprite.sprite = Sprite.Create(_thumbnail, new Rect(0, 0, _thumbnail.width, _thumbnail.height), new Vector2(0, 0));
         }
@@ -537,34 +547,9 @@ public class ComicObject : MonoBehaviour
         //pega o source selecionado
         getSourceClass();
 
-        pagesURL.Clear();
-        if (rawPostData != "")
-        {
-            textSample = rawPostData;
-        }
-        else
-        {
-            GetPostHTML();
-        }
-        string _textSample;
-        int cycleProtection = 0;
+        OnlinePagesURL.Clear();
+        GetPostHTML();
         
-        //o parse json começa aqui
-        textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.searchIndexReference) + source.imageSearch.searchIndexReference.Length);
-        while (textSample.IndexOf(source.imageSearch.start) != -1 && cycleProtection < 300)
-        {
-            cycleProtection++;
-            textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.start) + source.imageSearch.start.Length);
-            _textSample = source.imageSearch.PrefixMissing + textSample.Substring(0, textSample.IndexOf(source.imageSearch.finish));
-            string newImageURL = _textSample;
-            if (source.imageSearch.replace != "" || source.imageSearch.replaceTo != "")
-            {
-                newImageURL = newImageURL.Replace(source.imageSearch.replace, source.imageSearch.replaceTo);
-            }
-            newImageURL = newImageURL.Substring(0, newImageURL.Length - source.imageSearch.cutLastIndex);
-
-            OnlinePagesURL.Add(newImageURL);
-        }
     }
     public void GetPostHTML()
     {
@@ -587,8 +572,32 @@ public class ComicObject : MonoBehaviour
                 string Text = uwr.downloadHandler.text;
 
                 rawPostData = Text;
+                if (rawPostData != "")
+                {
+                    textSample = rawPostData;
+                }
+                string _textSample;
+                int cycleProtection = 0;
+
+                //o parse json começa aqui
+                textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.searchIndexReference) + source.imageSearch.searchIndexReference.Length);
+                while (textSample.IndexOf(source.imageSearch.start) != -1 && cycleProtection < 300)
+                {
+                    cycleProtection++;
+                    textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.start) + source.imageSearch.start.Length);
+                    _textSample = source.imageSearch.PrefixMissing + textSample.Substring(0, textSample.IndexOf(source.imageSearch.finish));
+                    string newImageURL = _textSample;
+                    if (source.imageSearch.replace != "" || source.imageSearch.replaceTo != "")
+                    {
+                        newImageURL = newImageURL.Replace(source.imageSearch.replace, source.imageSearch.replaceTo);
+                    }
+                    newImageURL = newImageURL.Substring(0, newImageURL.Length - source.imageSearch.cutLastIndex);
+
+                    OnlinePagesURL.Add(newImageURL);
+                }
             }
         }
+        getThumbnailOnline();
     }
     public void CreateImagesData()
     {

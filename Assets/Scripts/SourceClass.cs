@@ -22,10 +22,13 @@ public class SourceClass
     public class SearchIndex
     {
         [SerializeField] public string name;
+        [SerializeField] public string link;
         [SerializeField] public string start;
         [SerializeField] public string finish;
         [SerializeField] public string replace;
         [SerializeField] public string replaceTo;
+        [SerializeField] public string PrefixMissing;
+        [SerializeField] public string SuffixMissing;
     }
     [Serializable]
     public class imageSearch

@@ -40,7 +40,7 @@ public class ComicDownloadManager : MonoBehaviour
     [TextArea(3, 10)]
     public string textSample;
 
-
+    public Texture2D defaultThumb;
     public List<string> postData;
 
     private CoroutineQueue queue;
@@ -81,7 +81,10 @@ public class ComicDownloadManager : MonoBehaviour
         {
             getFoldersPath();
         }
-        
+        if(sourceSelected == "")
+        {
+            selectSource();
+        }
         FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(sourcePath.Path, false);
         foreach (Transform child in ComicItemContainer.transform)
         {
@@ -160,7 +163,7 @@ public class ComicDownloadManager : MonoBehaviour
             //toSend = source.postParser.startSyntax + toSend;
             
             toSend = source.postParser.PrefixMissing + toSend + source.postParser.SuffixMissing;
-            Debug.Log(toSend);
+            //Debug.Log(toSend);
             postData.Add(toSend);
         }
         CreatePostData();
@@ -180,28 +183,59 @@ public class ComicDownloadManager : MonoBehaviour
             Debug.Log(source.ToString());
             for (int x = 0; x < source.searchs.Count; x++)
             {
-                _postData = _postData.Substring(_postData.IndexOf(source.searchs[x].start) + source.searchs[x].start.Length);
+                _postData = postData[i].Substring(postData[i].IndexOf(source.searchs[x].start) + source.searchs[x].start.Length);
                 string toSend = _postData.Substring(0, _postData.IndexOf(source.searchs[x].finish));
                 if(source.searchs[x].replace !=""|| source.searchs[x].replaceTo != "")
                 {
                     toSend = toSend.Replace(source.searchs[x].replace, source.searchs[x].replaceTo);
                 }
-                
                 _postInfo.Add(toSend);
             }
             GameObject ComicPostInstance = Instantiate(comicItemPrefab, ComicItemContainer.transform);
             ComicPostInstance.name = _postInfo[0];
-            ComicPostInstance.GetComponent<ComicObject>().comicName = _postInfo[0];
+            ComicPostInstance.GetComponent<ComicObject>().comicName = source.searchs[0].PrefixMissing + _postInfo[0];
             ComicPostInstance.GetComponent<ComicObject>().url = _postInfo[1];
             ComicPostInstance.GetComponent<ComicObject>().rawPostData = postData[i];
             ComicPostInstance.GetComponent<ComicObject>().comicScreen = comicScreen;
             ComicPostInstance.GetComponent<ComicObject>().comicSelectScreen = comicSelectScreen;
             ComicPostInstance.GetComponent<ComicObject>().photoViewer = _photoViewer;
             ComicPostInstance.GetComponent<ComicObject>().sourceSelected = sourceSelected;
-            ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
+            if(source.searchs[2].link == "" || source.searchs[2].link == null)
+            {
+                ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
+            }
+        }
+        if (source.searchs[2].link != "" || source.searchs[2].link != null || defaultThumb == null )
+        {
+            Uri thumb = new Uri(source.searchs[2].link);
+            queue.Run(getDefaultThumbnail(thumb));
         }
     }
 
+    IEnumerator getDefaultThumbnail(Uri url2, int index = 0, bool download = false)
+    {
+        Debug.Log("Baixando " + url2);
+
+        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url2))
+        {
+            yield return uwr.SendWebRequest();
+
+            if (uwr.result == UnityWebRequest.Result.ConnectionError)
+            {
+                Debug.Log("Erro UnityWebRequest: " + uwr.error);
+            }
+            else
+            {
+                Debug.Log("Success" + uwr.error + " " + url2);
+                defaultThumb = DownloadHandlerTexture.GetContent(uwr);
+                foreach (Transform child in ComicItemContainer.transform)
+                {
+                    child.GetComponent<ComicObject>().displayThumbnail(defaultThumb);
+                    child.GetComponent<ComicObject>().UpdatePostInfo();
+                }
+            }
+        }
+    }
     public void Page(int page)
     {
         pageNumber += page;
@@ -266,8 +300,12 @@ public class ComicDownloadManager : MonoBehaviour
         }
         Application.OpenURL(comicPath.Path);
     }
-    public void selectSource(string info)
+    public void selectSource(string info = null)
     {
+        if ( info == null)
+        {
+            info = PlayerPrefs.GetString("defaultSource");
+        }
         sourceSelected = info;
         PlayerPrefs.SetString("defaultSource", info);
         InfoPopupUtil.ShowInformation("Selecionou [" + sourceSelected + "]!");
