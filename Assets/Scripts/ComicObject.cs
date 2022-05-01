@@ -20,6 +20,8 @@ public class ComicObject : MonoBehaviour
     public FileSystemEntry comicPath = new FileSystemEntry();
     public FileSystemEntry sourcePath = new FileSystemEntry();
 
+    public string comicFolder;
+
     public List<string> OnlinePagesURL = new List<string>();
     public string rawPostData;
     public string sourceSelected;
@@ -101,9 +103,9 @@ public class ComicObject : MonoBehaviour
             }
         }
     }
-    public void GetLocalComicInfo(string comicPath)
+    public void GetLocalComicInfo(string info)
     {
-        FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(comicPath, false);
+        FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(info, false);
         for (int i = 0; i < fileEntries.Length; i++)
         {
             pagesURL.Add(fileEntries[i]);
@@ -147,7 +149,10 @@ public class ComicObject : MonoBehaviour
         if (_exist)
         {
             PopulateComicPagesPath();
-            queue.Run(LoadLocalImage(_ComicPages[0]));
+            if(_ComicPages.Length > 0)
+            {
+                queue.Run(LoadLocalImage(_ComicPages[0]));
+            }
             return;
         }
 
@@ -171,8 +176,6 @@ public class ComicObject : MonoBehaviour
                 continue;
             }
             queue.Run(LoadLocalImage(pagesURL[i], i));
-            //Uri _url = new Uri(pagesURL[i].Path);
-            //StartCoroutine(DownloadingImage(_url, i));
         }
     }
 
@@ -260,7 +263,14 @@ public class ComicObject : MonoBehaviour
             }
             Debug.Log("Link: " + OnlinePagesURL[i]);
             Uri _url = new Uri(OnlinePagesURL[i]);
-            queue.Run(DownloadingImage(_url, i, true));
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                queue.Run(DownloadingImageAndroid(_url, i, true));
+            }
+            else
+            {
+                queue.Run(DownloadingImage(_url, i, true));
+            }
         }
     }
     private IEnumerator LoadLocalImage(FileSystemEntry _fileToLoad, int index = 0)
@@ -297,6 +307,57 @@ public class ComicObject : MonoBehaviour
     {
         Debug.Log("Baixando " + url2);
 
+        string fileName = Path.GetFileName(OnlinePagesURL[index]);
+        string _comicName = comicName.Replace("\\", "");
+        _comicName = _comicName.Replace("/", "");
+
+        if (comicFolder == "")
+        {
+            comicFolder = GetComicFolder(_comicName);
+        }
+        string _filePath = "";
+
+        try
+        {
+            _filePath = Path.Combine(comicFolder, fileName);
+            Debug.Log("Criando arquivo " + _filePath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Failed To Save Data to: " + comicFolder.Replace("/", "\\"));
+            Debug.LogWarning("Error: " + e.Message);
+        }
+
+        UnityWebRequest uwr = new UnityWebRequest(url2);
+        uwr.method = UnityWebRequest.kHttpVerbGET;
+        var dh = new DownloadHandlerFile(_filePath);
+        dh.removeFileOnAbort = true;
+        uwr.downloadHandler = dh;
+
+        yield return uwr.SendWebRequest();
+        if (uwr.result != UnityWebRequest.Result.Success)
+            Debug.Log(uwr.error);
+        else
+        {
+            Debug.Log("Salvo em: " + _filePath);
+
+            //Barra de progresso
+            totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
+
+            if (OnlinePagesURL.Count == DownloadSucess.Count)
+            {
+                InfoPopupUtil.ShowInformation("Baixou a comic[" + comicName + "] com sucesso!");
+                Debug.Log("Baixou a comic[" + comicName + "] com sucesso!");
+                clearMemory();
+            }
+        }
+        uwr.Dispose();
+    }
+
+    IEnumerator DownloadingImageAndroid(Uri url2, int index = 0, bool download = false)
+    {
+        Debug.Log("Baixando " + url2);
+
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url2))
         {
             yield return uwr.SendWebRequest();
@@ -315,8 +376,8 @@ public class ComicObject : MonoBehaviour
                     string _comicName = comicName.Replace("\\", "");
                     _comicName = _comicName.Replace("/", "");
                     //string _folder = comicPath + _comicName + "\\";
-                    Debug.Log("saveImage("+ comicPath.Path + ", " + uwr.downloadHandler.data + ", " + _comicName + ", " + fileName +");");
-                    saveImage(comicPath.Path, uwr.downloadHandler.data, _comicName ,fileName);  // give filename
+                    Debug.Log("saveImage(" + comicPath.Path + ", " + uwr.downloadHandler.data + ", " + _comicName + ", " + fileName + ");");
+                    saveImage(comicPath.Path, uwr.downloadHandler.data, _comicName, fileName);  // give filename
                     DownloadSucess.Add(fileName);
                     downloadBar.value = DownloadSucess.Count;
                     uwr.Dispose();
@@ -324,11 +385,11 @@ public class ComicObject : MonoBehaviour
             }
         }
         totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
-        
+
         if (OnlinePagesURL.Count == DownloadSucess.Count)
         {
             InfoPopupUtil.ShowInformation("Baixou a comic[" + comicName + "] com sucesso!");
-            Debug.Log("Baixou a comic["+comicName+"] com sucesso!");
+            Debug.Log("Baixou a comic[" + comicName + "] com sucesso!");
             clearMemory();
         }
     }
@@ -409,6 +470,35 @@ public class ComicObject : MonoBehaviour
             Debug.LogWarning("Error: " + e.Message);
         }
         imageBytes = null;
+    }
+
+    public string GetComicFolder(string _comicName)
+    {
+        FileSystemEntry _comicPath = new FileSystemEntry();
+        string _newComicPath = "";
+        //Create Directory if it does not exist
+        FileSystemEntry[] _folders = FileBrowserHelpers.GetEntriesInDirectory(comicPath.Path, false);
+        for (int i = 0; i < _folders.Length; i++)
+        {
+            if (_folders[i].Name == _comicName)
+            {
+                _comicPath = _folders[i];
+            }
+        }
+        if (_comicPath.Path == null)
+        {
+            Debug.Log("Criando pasta em: " + comicPath.Path + _comicName);
+            _newComicPath = FileBrowserHelpers.CreateFolderInDirectory(comicPath.Path, _comicName);
+        }
+        else
+        {
+            //Debug.Log(path + " does exist");
+        }
+        if (_newComicPath == "")
+        {
+            _newComicPath = _comicPath.Path;
+        }
+        return _newComicPath;
     }
 
     //atualiza o caminho das pastas
