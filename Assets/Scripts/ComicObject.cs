@@ -132,7 +132,7 @@ public class ComicObject : MonoBehaviour
 
     public void getThumbnailOnline()
     {
-        if(source.searchs[2].name == "thumbnail" && source.searchs[2].link != null && sprite.sprite == null)
+        if(source.searchs[2].name == "thumbnail" && source.searchs[2].link != null && source.searchs[2].link != "" && sprite.sprite == null)
         {
             Uri thumb = new Uri(source.searchs[2].link);
             queue.Run(StreamImage(thumb));

@@ -81,6 +81,7 @@ public class ComicDownloadManager : MonoBehaviour
     }
     public void SourcePostsShowCreate()
     {
+        Debug.Log("Bag");
         loadingScreen.SetActive(true);
         if (sourcePath.Path == null)
         {
@@ -94,11 +95,11 @@ public class ComicDownloadManager : MonoBehaviour
         {
             getSource();
         }
+        Debug.Log("Bag");
         foreach (Transform child in ComicItemContainer.transform)
         {
             GameObject.Destroy(child.gameObject);
         }
-        
         string sourceSyntax = source.PostsURL + source.PageSyntax + (pageNumber * perPage).ToString() + source.PerPageSyntax + perPage.ToString() + source.SuffixSyntax + source.Options;
         if(postsText != "")
         {
@@ -165,7 +166,6 @@ public class ComicDownloadManager : MonoBehaviour
             postData.Add(toSend);
         }
         queue.Run(CreatePostData());
-        loadingScreen.SetActive(false);
         yield return null;
     }
 
@@ -206,6 +206,7 @@ public class ComicDownloadManager : MonoBehaviour
             }
             ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
         }
+        loadingScreen.SetActive(false);
         yield return null;
     }
 
@@ -306,7 +307,8 @@ public class ComicDownloadManager : MonoBehaviour
     public void getSource()
     {
         Debug.Log("Coletando Source");
-        if(sourcePath.Path == null)
+        resetInstances();
+        if (sourcePath.Path == null)
         {
             getFoldersPath();
         }
@@ -321,13 +323,20 @@ public class ComicDownloadManager : MonoBehaviour
                 string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
 
                 source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
-                if (source.searchs[2].link != null || source.searchs[2].link != "")
+                if (source.searchs[2].link != null && source.searchs[2].link != "")
                 {
                     Uri _url = new Uri(source.searchs[2].link);
                     queue.Run(getDefaultThumbnail(_url));
                 }
             }
         }
+    }
+    public void resetInstances()
+    {
+        postsText = "";
+        textSample = "";
+        defaultThumb = null;
+        postData.Clear();
     }
 
 }
