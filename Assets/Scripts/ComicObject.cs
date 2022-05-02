@@ -33,6 +33,7 @@ public class ComicObject : MonoBehaviour
     public GameObject comicScreen;
     public GameObject comicSelectScreen;
 
+
     public Slider downloadBar;
 
 
@@ -131,7 +132,7 @@ public class ComicObject : MonoBehaviour
 
     public void getThumbnailOnline()
     {
-        if(source.searchs[2].name == "thumbnail" && source.searchs[2].link != null)
+        if(source.searchs[2].name == "thumbnail" && source.searchs[2].link != null && sprite.sprite == null)
         {
             Uri thumb = new Uri(source.searchs[2].link);
             queue.Run(StreamImage(thumb));
@@ -162,9 +163,11 @@ public class ComicObject : MonoBehaviour
             }
             return;
         }
-
-        Uri _dImage = new Uri(OnlinePagesURL[0]);
-        queue.Run(StreamImage(_dImage));
+        if(sprite.sprite == null)
+        {
+            Uri _dImage = new Uri(OnlinePagesURL[0]);
+            queue.Run(StreamImage(_dImage));
+        }
     }
 
     public void offLineComicShow()
@@ -350,7 +353,8 @@ public class ComicObject : MonoBehaviour
 
             //Barra de progresso
             totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
-
+            DownloadSucess.Add(_filePath);
+            downloadBar.value = DownloadSucess.Count;
             if (OnlinePagesURL.Count == DownloadSucess.Count)
             {
                 InfoPopupUtil.ShowInformation("Baixou a comic[" + comicName + "] com sucesso!");
@@ -479,7 +483,6 @@ public class ComicObject : MonoBehaviour
             Debug.LogWarning("Error: " + e.Message);
         }
         imageBytes = null;
-        clearMemory();
     }
 
     public string GetComicFolder(string _comicName)

@@ -33,6 +33,8 @@ public class ComicDownloadManager : MonoBehaviour
     public GameObject comicScreen;
     public GameObject comicSelectScreen;
 
+    public GameObject loadingScreen;
+
     public TextMeshProUGUI pageText;
 
     [TextArea(3, 10)]
@@ -41,6 +43,7 @@ public class ComicDownloadManager : MonoBehaviour
     public string textSample;
 
     public Texture2D defaultThumb;
+
     public List<string> postData;
 
     private CoroutineQueue queue;
@@ -56,6 +59,7 @@ public class ComicDownloadManager : MonoBehaviour
         if(sourceSelected == "")
         {
             sourceSelected = PlayerPrefs.GetString("defaultSource");
+            getSource();
         }
     }
 
@@ -77,6 +81,7 @@ public class ComicDownloadManager : MonoBehaviour
     }
     public void SourcePostsShowCreate()
     {
+        loadingScreen.SetActive(true);
         if (sourcePath.Path == null)
         {
             getFoldersPath();
@@ -85,31 +90,24 @@ public class ComicDownloadManager : MonoBehaviour
         {
             selectSource();
         }
-        FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(sourcePath.Path, false);
+        if(source == null)
+        {
+            getSource();
+        }
         foreach (Transform child in ComicItemContainer.transform)
         {
             GameObject.Destroy(child.gameObject);
         }
-        for (int i = 0; i < fileEntries.Length; i++)
-        {
-            //Debug.Log("Comparando " + fileEntries[i].Name + " com " + sourceSelected + ".json");
-            if (fileEntries[i].Name == sourceSelected)
-            {
-                Debug.Log("Achou Source");
-                string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
-
-                source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
-            }
-        }
+        
         string sourceSyntax = source.PostsURL + source.PageSyntax + (pageNumber * perPage).ToString() + source.PerPageSyntax + perPage.ToString() + source.SuffixSyntax + source.Options;
         if(postsText != "")
         {
-            InstantiateWebPosts();
+            queue.Run(InstantiateWebPosts());
             return;
         }
         Debug.Log("Source Pego " + sourceSyntax);
         Uri url = new Uri(sourceSyntax);
-        StartCoroutine(DownloadPostsPages(url));
+        queue.Run(DownloadPostsPages(url));
     }
     public void LocalPostsShowCreate()
     {
@@ -144,7 +142,7 @@ public class ComicDownloadManager : MonoBehaviour
         yield return null;
     }
 
-    public void InstantiateWebPosts()
+    IEnumerator InstantiateWebPosts()
     {
         int cycleProtection = 0;
         textSample = postsText;
@@ -166,10 +164,12 @@ public class ComicDownloadManager : MonoBehaviour
             //Debug.Log(toSend);
             postData.Add(toSend);
         }
-        CreatePostData();
+        queue.Run(CreatePostData());
+        loadingScreen.SetActive(false);
+        yield return null;
     }
 
-    public void CreatePostData()
+    public IEnumerator CreatePostData()
     {
         foreach (Transform child in ComicItemContainer.transform)
         {
@@ -200,21 +200,18 @@ public class ComicDownloadManager : MonoBehaviour
             ComicPostInstance.GetComponent<ComicObject>().comicSelectScreen = comicSelectScreen;
             ComicPostInstance.GetComponent<ComicObject>().photoViewer = _photoViewer;
             ComicPostInstance.GetComponent<ComicObject>().sourceSelected = sourceSelected;
-            if(source.searchs[2].link == "" || source.searchs[2].link == null)
+            if(defaultThumb != null)
             {
-                ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
+                ComicPostInstance.GetComponent<ComicObject>().displayThumbnail(defaultThumb);
             }
+            ComicPostInstance.GetComponent<ComicObject>().UpdatePostInfo();
         }
-        if (source.searchs[2].link != "" || source.searchs[2].link != null || defaultThumb == null )
-        {
-            Uri thumb = new Uri(source.searchs[2].link);
-            queue.Run(getDefaultThumbnail(thumb));
-        }
+        yield return null;
     }
 
-    IEnumerator getDefaultThumbnail(Uri url2, int index = 0, bool download = false)
+    IEnumerator getDefaultThumbnail(Uri url2)
     {
-        Debug.Log("Baixando " + url2);
+        Debug.Log("Baixando  Thumbnail" + url2);
 
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url2))
         {
@@ -228,11 +225,6 @@ public class ComicDownloadManager : MonoBehaviour
             {
                 Debug.Log("Success" + uwr.error + " " + url2);
                 defaultThumb = DownloadHandlerTexture.GetContent(uwr);
-                foreach (Transform child in ComicItemContainer.transform)
-                {
-                    child.GetComponent<ComicObject>().displayThumbnail(defaultThumb);
-                    child.GetComponent<ComicObject>().UpdatePostInfo();
-                }
             }
         }
     }
@@ -264,7 +256,7 @@ public class ComicDownloadManager : MonoBehaviour
                 postsText = Text;
             }
         }
-        InstantiateWebPosts();
+        queue.Run(InstantiateWebPosts());
     }
     public void clearMemory()
     {
@@ -309,6 +301,33 @@ public class ComicDownloadManager : MonoBehaviour
         sourceSelected = info;
         PlayerPrefs.SetString("defaultSource", info);
         InfoPopupUtil.ShowInformation("Selecionou [" + sourceSelected + "]!");
+        getSource();
+    }
+    public void getSource()
+    {
+        Debug.Log("Coletando Source");
+        if(sourcePath.Path == null)
+        {
+            getFoldersPath();
+        }
+        FileSystemEntry[] fileEntries = FileBrowserHelpers.GetEntriesInDirectory(sourcePath.Path, false);
+        
+        for (int i = 0; i < fileEntries.Length; i++)
+        {
+            //Debug.Log("Comparando " + fileEntries[i].Name + " com " + sourceSelected + ".json");
+            if (fileEntries[i].Name == sourceSelected)
+            {
+                Debug.Log("Achou Source");
+                string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
+
+                source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
+                if (source.searchs[2].link != null || source.searchs[2].link != "")
+                {
+                    Uri _url = new Uri(source.searchs[2].link);
+                    queue.Run(getDefaultThumbnail(_url));
+                }
+            }
+        }
     }
 
 }

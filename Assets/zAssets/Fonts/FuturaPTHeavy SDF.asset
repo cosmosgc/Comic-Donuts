@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FuturaPTHeavy Atlas Material
-  m_Shader: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
+  m_Shader: {fileID: 4800000, guid: 38a5c1cb3d5984a4c9322a009b102db8, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -57,17 +57,17 @@ Material:
     - _FaceUVSpeedX: 0
     - _FaceUVSpeedY: 0
     - _GlowInner: 0.05
-    - _GlowOffset: 0
-    - _GlowOuter: 0.05
+    - _GlowOffset: 0.177
+    - _GlowOuter: 0
     - _GlowPower: 0.75
     - _GradientScale: 10
     - _LightAngle: 3.1416
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
-    - _OutlineSoftness: 0
+    - _OutlineSoftness: 0.4
     - _OutlineUVSpeedX: 0
     - _OutlineUVSpeedY: 0
-    - _OutlineWidth: 0
+    - _OutlineWidth: 0.2
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.9
@@ -97,7 +97,7 @@ Material:
     - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
     - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
-    - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
+    - _GlowColor: {r: 0.84404004, g: 0.023584902, b: 1, a: 0.5}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _ReflectFaceColor: {r: 0, g: 0, b: 0, a: 1}
@@ -1645,6 +1645,20 @@ MonoBehaviour:
       m_Height: 67
     m_Scale: 1
     m_AtlasIndex: 0
+  - m_Index: 511
+    m_Metrics:
+      m_Width: 42.03125
+      m_Height: 10.625
+      m_HorizontalBearingX: 6.296875
+      m_HorizontalBearingY: 28.078125
+      m_HorizontalAdvance: 54.625
+    m_GlyphRect:
+      m_X: 260
+      m_Y: 563
+      m_Width: 43
+      m_Height: 12
+    m_Scale: 1
+    m_AtlasIndex: 0
   - m_Index: 515
     m_Metrics:
       m_Width: 21.78125
@@ -1699,20 +1713,6 @@ MonoBehaviour:
       m_Y: 10
       m_Width: 70
       m_Height: 18
-    m_Scale: 1
-    m_AtlasIndex: 0
-  - m_Index: 511
-    m_Metrics:
-      m_Width: 42.03125
-      m_Height: 10.625
-      m_HorizontalBearingX: 6.296875
-      m_HorizontalBearingY: 28.078125
-      m_HorizontalAdvance: 54.625
-    m_GlyphRect:
-      m_X: 260
-      m_Y: 563
-      m_Width: 43
-      m_Height: 12
     m_Scale: 1
     m_AtlasIndex: 0
   m_CharacterTable:
@@ -2145,6 +2145,10 @@ MonoBehaviour:
     m_GlyphIndex: 186
     m_Scale: 1
   - m_ElementType: 1
+    m_Unicode: 8211
+    m_GlyphIndex: 511
+    m_Scale: 1
+  - m_ElementType: 1
     m_Unicode: 8217
     m_GlyphIndex: 515
     m_Scale: 1
@@ -2159,10 +2163,6 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 8230
     m_GlyphIndex: 523
-    m_Scale: 1
-  - m_ElementType: 1
-    m_Unicode: 8211
-    m_GlyphIndex: 511
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: 2362247267592774015}
