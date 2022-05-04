@@ -10,6 +10,7 @@ using PhotoViewer.Scripts;
 using SimpleFileBrowser;
 using Madhur.InfoPopup;
 using Proyecto26;
+using System.Text.RegularExpressions;
 
 public class ComicObject : MonoBehaviour
 {
@@ -189,11 +190,16 @@ public class ComicObject : MonoBehaviour
         }
     }
 
+    public static string PadNumbers(string input)
+    {
+        return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(10, '0'));
+    }
+
     public void ShowComic()
     {
         comicScreen.SetActive(true);
         //photoViewer.Clear();
-        image.Sort((x, y) => string.Compare(x.Name, y.Name)); ;
+        image.Sort((x, y) => string.Compare(PadNumbers(x.Name), PadNumbers(y.Name))); ;
         photoViewer.AddImageData(image);
         photoViewer.Show();
         Debug.Log("Galeria Criada");
