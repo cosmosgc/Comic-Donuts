@@ -10,7 +10,6 @@ using PhotoViewer.Scripts;
 using SimpleFileBrowser;
 using Madhur.InfoPopup;
 using Proyecto26;
-using System.Text.RegularExpressions;
 
 public class ComicObject : MonoBehaviour
 {
@@ -190,16 +189,12 @@ public class ComicObject : MonoBehaviour
         }
     }
 
-    public static string PadNumbers(string input)
-    {
-        return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(10, '0'));
-    }
 
     public void ShowComic()
     {
         comicScreen.SetActive(true);
         //photoViewer.Clear();
-        image.Sort((x, y) => string.Compare(PadNumbers(x.Name), PadNumbers(y.Name))); ;
+        image.Sort((x, y) => string.Compare(x.Name, y.Name)); ;
         photoViewer.AddImageData(image);
         photoViewer.Show();
         Debug.Log("Galeria Criada");
@@ -266,7 +261,7 @@ public class ComicObject : MonoBehaviour
                         long _fileSize = FileBrowserHelpers.GetFilesize(_ComicPages[y].Path);
                         if (_fileSize > 30569)
                         {
-                            Debug.Log("Arquivo j· existe: " + _ComicPages[y].Path + "Possui kb: " + _fileSize);
+                            Debug.Log("Arquivo j√° existe: " + _ComicPages[y].Path + "Possui kb: " + _fileSize);
                             _exist = true;
                             break;
                         }
@@ -311,7 +306,7 @@ public class ComicObject : MonoBehaviour
         {
             displayThumbnail();
         }
-        totalPagesText.text = "P·ginas " + pagesURL.Count.ToString();
+        totalPagesText.text = "P√°ginas " + pagesURL.Count.ToString();
         if (pagesURL.Count == image.Count)
         {
             downloadBar.gameObject.SetActive(false);
@@ -358,7 +353,7 @@ public class ComicObject : MonoBehaviour
             Debug.Log("Salvo em: " + _filePath);
 
             //Barra de progresso
-            totalPagesText.text = "P·ginas " + OnlinePagesURL.Count.ToString();
+            totalPagesText.text = "P√°ginas " + OnlinePagesURL.Count.ToString();
             DownloadSucess.Add(_filePath);
             downloadBar.value = DownloadSucess.Count;
             if (OnlinePagesURL.Count == DownloadSucess.Count)
@@ -402,7 +397,7 @@ public class ComicObject : MonoBehaviour
             }
 
         }
-        totalPagesText.text = "P·ginas " + OnlinePagesURL.Count.ToString();
+        totalPagesText.text = "P√°ginas " + OnlinePagesURL.Count.ToString();
 
         if (OnlinePagesURL.Count == DownloadSucess.Count)
         {
@@ -413,7 +408,7 @@ public class ComicObject : MonoBehaviour
     }
 
 
-    //baixa a imagem sem salvar no HD, fica na memÛria
+    //baixa a imagem sem salvar no HD, fica na mem√≥ria
     IEnumerator StreamImage(Uri url2, int index = 0, bool download = false)
     {
         Debug.Log("Baixando " + url2);
@@ -442,7 +437,7 @@ public class ComicObject : MonoBehaviour
         {
             displayThumbnail();
         }
-        totalPagesText.text = "P·ginas " + OnlinePagesURL.Count.ToString();
+        totalPagesText.text = "P√°ginas " + OnlinePagesURL.Count.ToString();
 
         if (OnlinePagesURL.Count == image.Count)
         {
@@ -588,7 +583,7 @@ public class ComicObject : MonoBehaviour
                 string _textSample;
                 int cycleProtection = 0;
 
-                //o parse json comeÁa aqui
+                //o parse json come√ßa aqui
                 textSample = textSample.Substring(textSample.IndexOf(source.imageSearch.searchIndexReference) + source.imageSearch.searchIndexReference.Length);
                 while (textSample.IndexOf(source.imageSearch.start) != -1 && cycleProtection < 300)
                 {
