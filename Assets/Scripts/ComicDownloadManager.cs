@@ -81,7 +81,6 @@ public class ComicDownloadManager : MonoBehaviour
     }
     public void SourcePostsShowCreate()
     {
-        Debug.Log("Bag");
         loadingScreen.SetActive(true);
         if (sourcePath.Path == null)
         {
@@ -95,7 +94,6 @@ public class ComicDownloadManager : MonoBehaviour
         {
             getSource();
         }
-        Debug.Log("Bag");
         foreach (Transform child in ComicItemContainer.transform)
         {
             GameObject.Destroy(child.gameObject);
@@ -180,7 +178,7 @@ public class ComicDownloadManager : MonoBehaviour
             string _postData = postData[i];
             List<string> _postInfo = new List<string>();
 
-            Debug.Log(source.ToString());
+            //Debug.Log(source.ToString());
             for (int x = 0; x < source.searchs.Count; x++)
             {
                 _postData = postData[i].Substring(postData[i].IndexOf(source.searchs[x].start) + source.searchs[x].start.Length);

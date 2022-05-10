@@ -87,7 +87,7 @@ public class ComicObject : MonoBehaviour
 
     public void getSourceClass()
     {
-        if (sourcePath.Path == null)
+        if (sourcePath.Path == null || comicPath.Path == "")
         {
             getFoldersPath();
         }
@@ -98,7 +98,7 @@ public class ComicObject : MonoBehaviour
             //Debug.Log("Comparando " + fileEntries[i].Name + " com " + sourceSelected + ".json");
             if (fileEntries[i].Name == sourceSelected)
             {
-                Debug.Log("Achou Source");
+                //Debug.Log("Achou Source");
                 string JsonFile = FileBrowserHelpers.ReadTextFromFile(fileEntries[i].Path);
 
                 source = JsonUtility.FromJson<SourceClass.source>(JsonFile);
@@ -141,7 +141,7 @@ public class ComicObject : MonoBehaviour
         string _comicName = comicName.Replace("\\", "");
         _comicName = _comicName.Replace("/", "");
         bool _exist = false;
-        if (comicPath.Path == null)
+        if (comicPath.Path == null || comicPath.Path == "")
         {
             getFoldersPath();
         }
@@ -194,7 +194,7 @@ public class ComicObject : MonoBehaviour
     {
         comicScreen.SetActive(true);
         //photoViewer.Clear();
-        image.Sort((x, y) => string.Compare(x.Name, y.Name)); ;
+        image.Sort((x, y) => string.Compare(x.Name, y.Name));
         photoViewer.AddImageData(image);
         photoViewer.Show();
         Debug.Log("Galeria Criada");
@@ -223,11 +223,11 @@ public class ComicObject : MonoBehaviour
     }
     public void DownloadSourceComic()
     {
-        if(comicPath.Path == null)
+        if(comicPath.Path == null || comicPath.Path == "")
         {
             getFoldersPath();
         }
-        Debug.Log("Baixando comic: " + comicName);
+        //Debug.Log("Baixando comic: " + comicName);
         if(OnlinePagesURL.Count == 0)
         {
             getPagesLink();
@@ -244,10 +244,10 @@ public class ComicObject : MonoBehaviour
 
         for (int i = 0; i < OnlinePagesURL.Count; i++)
         {
-            string fileName = Path.GetFileName(OnlinePagesURL[i]);
+            string fileName = (i.ToString().PadLeft(3, '0')) + "-cd-" + Path.GetFileName(OnlinePagesURL[i]);
             string _comicName = comicName.Replace("\\", "");
             _comicName = _comicName.Replace("/", "");
-            Debug.Log("FileName: " + fileName + " ComicName: " + _comicName);
+            //Debug.Log("FileName: " + fileName + " ComicName: " + _comicName);
 
             //Verifica se arquivo existe
             bool _exist = false;
@@ -272,7 +272,7 @@ public class ComicObject : MonoBehaviour
             {
                 continue; 
             }
-            Debug.Log("Link: " + OnlinePagesURL[i]);
+            //Debug.Log("Link: " + OnlinePagesURL[i]);
             Uri _url = new Uri(OnlinePagesURL[i]);
             if (Application.platform == RuntimePlatform.Android)
             {
@@ -316,9 +316,9 @@ public class ComicObject : MonoBehaviour
     }
     IEnumerator DownloadingImage(Uri url2, int index = 0, bool download = false)
     {
-        Debug.Log("Baixando " + url2);
+        //Debug.Log("Baixando " + url2);
 
-        string fileName = Path.GetFileName(OnlinePagesURL[index]);
+        string fileName = (index.ToString().PadLeft(3, '0')) + "-cd-" + Path.GetFileName(OnlinePagesURL[index]);
         string _comicName = comicName.Replace("\\", "");
         _comicName = _comicName.Replace("/", "");
 
@@ -331,7 +331,7 @@ public class ComicObject : MonoBehaviour
         try
         {
             _filePath = Path.Combine(comicFolder, fileName);
-            Debug.Log("Criando arquivo " + _filePath);
+            //Debug.Log("Criando arquivo " + _filePath);
         }
         catch (Exception e)
         {
@@ -350,7 +350,7 @@ public class ComicObject : MonoBehaviour
             Debug.Log(uwr.error);
         else
         {
-            Debug.Log("Salvo em: " + _filePath);
+            //Debug.Log("Salvo em: " + _filePath);
 
             //Barra de progresso
             totalPagesText.text = "Páginas " + OnlinePagesURL.Count.ToString();
@@ -384,7 +384,7 @@ public class ComicObject : MonoBehaviour
                 if (download)
                 {
                     //byte[] results = uwr.downloadHandler.data;
-                    string fileName = Path.GetFileName(OnlinePagesURL[index]);
+                    string fileName = (index.ToString().PadLeft(3, '0')) + "-cd-" + Path.GetFileName(OnlinePagesURL[index]);
                     string _comicName = comicName.Replace("\\", "");
                     _comicName = _comicName.Replace("/", "");
                     //string _folder = comicPath + _comicName + "\\";
@@ -521,7 +521,7 @@ public class ComicObject : MonoBehaviour
         FileSystemEntry[] _folders = FileBrowserHelpers.GetEntriesInDirectory(PlayerPrefs.GetString("defaultFolder"), false);
         for (int i = 0; i < _folders.Length; i++)
         {
-            Debug.Log(_folders[i].Name);
+            //Debug.Log(_folders[i].Name);
             if (_folders[i].Name == "sources")
             {
                 sourcePath = _folders[i];
